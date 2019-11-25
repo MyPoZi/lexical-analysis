@@ -22,9 +22,9 @@ expr = term + ZeroOrMore(operator + term)
 
 rsvReturn = Literal('return')
 rsvWhile = Literal('while')
-rsvIf = Literal('if')
+rsvIf = Literal('IF')
 rsvElif = Literal('elif')
-rsvElse = Literal('else')
+rsvElse = Literal('ELSE')
 
 _assign = ident + opAssign + expr
 assignS = _assign.setResultsName('ASN')
@@ -38,36 +38,25 @@ returnS = _return.setResultsName('RTN')
 _while = rsvWhile + expr
 whileS = _while.setResultsName('while')
 
-ifS = (rsvIf + expr).setResultsName('IF')
+statement = Forward()
+
+# なんでかIFを認識しない、parse4のWHILEも同様
+# {}の中に式がなければ認識する
+# _if = rsvIf + expr + '{' + ZeroOrMore(statement) + '}'
+
+_if = rsvIf + expr + '{' + SkipTo('}')
+_else = rsvElse + '{' + SkipTo('}')
+
+ifS = _if.setResultsName('IF')
 elifS = (rsvElif + expr).setResultsName('ELIF')
-elseS = (rsvElse).setResultsName('ELSE')
+elseS = _else.setResultsName('ELSE')
 ifelS = ifS ^ elifS ^ elseS
 
-statement = declareS ^ assignS ^ returnS ^ whileS ^ ifelS
+# statement = declareS ^ assignS ^ returnS ^ whileS ^ ifelS
+statement << (declareS ^ assignS ^ returnS ^ whileS ^ ifelS)
 # statement
 
 st = '''\
-DECLARE IDENT
-DECLARE IDENT = CONST
-DECLARE IDENT = CONST * IDENT 
-IDENT=-CONST
-IDENT=IDENT+CONST
-IDENT=IDENT*IDENT+CONST/CONST
-IDENT=(IDENT+IDENT)
-IDENT=IDENT*(IDENT+IDENT)
-return
-return IDENT
-return IDENT+IDENT
-return (IDENT*IDENT+CONST)
-while IDENT { INDENT=CONST }
-while (IDENT<CONST){ INDENT=CONST }
-while (!IDENT&&CONST){ INDENT=CONST }
-while !(IDENT&&CONST){ INDENT=CONST }
-if(IDENT>CONST)
-if(CONST>CONST)
-IF CONST > CONST
-elif(!IDENT)
-else
 IF CONST > CONST { IDENT = COST }
 IF CONST == IDENT { IDENT = CONST EOS IDENT = IDENT EOS }
 IF CONST != IDENT { IDENT = CONST } ELSE { IDENT = CONST + IDENT }
