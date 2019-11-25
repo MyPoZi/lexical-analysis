@@ -4,7 +4,7 @@
 import sys
 
 st = '''\
-(x) (y){z}'''
+{ { x ( y ) (( z) x) {x} {y} }'''
 
 
 def main(st):
@@ -14,13 +14,10 @@ def main(st):
     print('index  char   operation   stack')
     print('-' * 30)
     for i, char in enumerate(st, start=1):
-
         err, operation = check_parenthesis(stk, char)
-
         if err:
             break
         print('%-3d:     %-6s %-10s %-20s' % (i, char, operation, ''.join(stk)))
-
     if err:
         print('error')
         return
