@@ -12,6 +12,10 @@ _EOS = Suppress(Literal('EOS'))
 _PM = oneOf('+ -')
 _MD = oneOf('* /')
 _WHL = Literal('WHILE')
+lparen    = Literal( '(' )
+rparen    = Literal( ')' )
+lbrace = Literal('{')
+rbrace = Literal('}')
 
 _opLogic = oneOf('== != < <= > >= && ||')
 
@@ -32,7 +36,7 @@ _declare = _DCL + _IDENT + Optional(_EQ + (_CONST ^ _expr))
 _return = _RTN + Optional(_CONST | _IDENT)
 _assign = _IDENT + _EQ + _expr
 # _while  = _WHL + '(' +  _cond + ')'+ '{' + SkipTo( '}' )
-_while = _WHL + '(' + _cond + ')' + '{' + ZeroOrMore(statement) + '}'
+_while = _WHL + lparen + _cond + rparen + lbrace + ZeroOrMore(statement) + rbrace
 
 declare_stmt = _declare.setResultsName('DCL_STMT')
 return_stmt = _return.setResultsName('RTN_STMT')
@@ -43,7 +47,6 @@ statement << (while_stmt ^ declare_stmt ^ return_stmt ^ assign_stmt)
 
 st = '''\
 WHILE ( CONST < IDENT ) {  }
-
 WHILE ( CONST < IDENT ) { IDENT=CONST+IDENT }
 WHILE ( CONST < IDENT ) { IDENT=IDENT EOS IDENT=CONST+IDENT EOS  }
 WHILE ( CONST < IDENT ) { DCL IDENT EOS IDENT=CONST+IDENT EOS }
